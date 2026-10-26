@@ -324,12 +324,11 @@ if (teacherLoginButton) {
       if (error) throw error;
 
       const { data: isTeacher, error: roleError } =
-        await supabaseClient.rpc("is_frogquiz_teacher");
-
+       await window.supabaseClient.rpc("is_frogquiz_teacher");
       if (roleError) throw roleError;
 
       if (isTeacher !== true) {
-        await supabaseClient.auth.signOut();
+       await window.supabaseClient.auth.signOut();
         throw new Error("This account is not authorized as a teacher.");
       }
 
