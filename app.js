@@ -7,6 +7,10 @@ const supabaseClient =
         window.FROGQUIZ_SUPABASE_PUBLISHABLE_KEY
       )
     : null;
+console.log(
+  "FrogQuiz Supabase connection:",
+  supabaseClient ? "Library and configuration loaded" : "Configuration missing"
+);
 const SAMPLE_EXAM = {
   "title": "Forest Knowledge Check",
   "questions": [
