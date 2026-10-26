@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#dff3d8">
+  <title>FrogQuiz</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-frog">🐸</span><div><h1>FrogQuiz</h1><p>Learn, leap, and grow!</p></div></div>
+    <nav>
+      <button class="nav-btn active" data-view="student">Student</button>
+      <button class="nav-btn" data-view="teacher">Teacher</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow">WELCOME TO THE FOREST</p><h2>Little steps. Big leaps.</h2>
+      <p class="hero-copy">Take your exam, check your learning, and watch your frog grow.</p></div>
+      <div class="hero-art" aria-hidden="true"><span class="leaf leaf1">🍃</span><span class="pond">🪷</span><span class="hero-frog">🐸</span><span class="leaf leaf2">🌿</span></div>
+    </section>
+
+    <section id="studentView" class="view">
+      <div class="panel">
+        <div class="section-heading"><div><p class="eyebrow">YOUR EXAM</p><h2 id="examTitle">Forest Knowledge Check</h2></div><span class="pill" id="questionCount">3 questions</span></div>
+        <label for="studentName">Your name</label>
+        <input id="studentName" maxlength="60" placeholder="Type your name" autocomplete="name">
+        <p class="hint">For this starter version, use this same device and browser for the demo.</p>
+        <div id="questions" class="questions"></div>
+        <button id="submitExam" class="primary wide">Submit exam</button>
+        <div id="result" class="result hidden" aria-live="polite"></div>
+      </div>
+
+      <div class="panel forest-panel">
+        <div class="section-heading"><div><p class="eyebrow">THE FOREST</p><h2>Frog Grove</h2></div><span class="pill">Score-sized frogs</span></div>
+        <p class="hint">Frogs show relative scores, not a public list of names or marks.</p>
+        <div id="forest" class="forest">
+          <div class="forest-empty">Submit a demo exam to grow your frog! 🌱</div>
+        </div>
+        <p class="small-note">Prototype note: this demo's forest is stored on this device only.</p>
+      </div>
+    </section>
+
+    <section id="teacherView" class="view hidden">
+      <div class="panel">
+        <p class="eyebrow">TEACHER WORKSPACE</p><h2>Prepare an exam</h2>
+        <p class="hint">Edit the sample exam below. Keep the JSON structure and save changes. This is a local prototype, not a secured teacher login.</p>
+        <label for="examJson">Exam content (JSON)</label>
+        <textarea id="examJson" rows="18" spellcheck="false"></textarea>
+        <div class="button-row"><button id="saveExam" class="primary">Save exam on this device</button><button id="resetExam" class="secondary">Restore sample</button></div>
+        <p id="teacherMessage" class="status" aria-live="polite"></p>
+      </div>
+      <div class="panel">
+        <div class="section-heading"><div><p class="eyebrow">LOCAL RESULTS</p><h2>Student scores</h2></div><button id="exportResults" class="secondary">Export results</button></div>
+        <p class="hint">Results appear here only if the student used this same browser/device. Cross-device transfer and a private online teacher dashboard will be added later.</p>
+        <div id="resultsTable" class="results-table"></div>
+        <button id="clearResults" class="text-button">Clear demo results</button>
+      </div>
+    </section>
+  </main>
+  <footer>FrogQuiz starter • Built for offline-first learning 🌿</footer>
+  <script src="app.js"></script>
+</body>
+</html>

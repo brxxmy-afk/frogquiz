@@ -1,0 +1,11 @@
+{
+  "name": "FrogQuiz Offline Exams",
+  "short_name": "FrogQuiz",
+  "description": "An offline-first classroom exam app with a frog forest.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6faef",
+  "theme_color": "#dff3d8",
+  "icons": []
+}
