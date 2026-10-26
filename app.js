@@ -1,3 +1,12 @@
+const supabaseClient =
+  window.supabase?.createClient &&
+  window.FROGQUIZ_SUPABASE_URL &&
+  window.FROGQUIZ_SUPABASE_PUBLISHABLE_KEY
+    ? window.supabase.createClient(
+        window.FROGQUIZ_SUPABASE_URL,
+        window.FROGQUIZ_SUPABASE_PUBLISHABLE_KEY
+      )
+    : null;
 const SAMPLE_EXAM = {
   "title": "Forest Knowledge Check",
   "questions": [
