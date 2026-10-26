@@ -351,3 +351,44 @@ if (teacherLoginButton) {
     }
   });
 }
+const saveClassButton = document.getElementById("saveClass");
+
+if (saveClassButton) {
+  saveClassButton.addEventListener("click", async () => {
+    const className = document.getElementById("className").value.trim();
+    const classCode = document.getElementById("classCode").value.trim();
+    const message = document.getElementById("classMessage");
+
+    if (!className || !classCode) {
+      message.textContent = "Enter a class name and class code.";
+      return;
+    }
+
+    if (!window.supabaseClient) {
+      message.textContent = "Supabase is not connected.";
+      return;
+    }
+
+    saveClassButton.disabled = true;
+    message.textContent = "Saving class...";
+
+    try {
+      const { data, error } = await window.supabaseClient.rpc(
+        "frogquiz_create_class",
+        {
+          p_class_name: className,
+          p_class_code: classCode
+        }
+      );
+
+      if (error) throw error;
+
+      message.textContent = "Class saved successfully!";
+    } catch (error) {
+      console.error("Save class failed:", error);
+      message.textContent = error.message || "Could not save class.";
+    } finally {
+      saveClassButton.disabled = false;
+    }
+  });
+}
