@@ -71,7 +71,11 @@
   <label for="classCode">Class code</label>
   <input id="classCode" type="text" maxlength="30" placeholder="Example: FILIPINO10">
   <p class="hint">Give this code to your students so they can find their class exams.</p>
-</div>
+<button id="saveClass" class="primary wide" type="button">
+  Save class
+</button>
+<p id="classMessage" class="status" aria-live="polite"></p>
+        </div>
         <p class="hint">Edit the sample exam below. Keep the JSON structure and save changes. This is a local prototype, not a secured teacher login.</p>
         <label for="examJson">Exam content (JSON)</label>
         <textarea id="examJson" rows="18" spellcheck="false"></textarea>
