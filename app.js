@@ -306,7 +306,7 @@ if (teacherLoginButton) {
       return;
     }
 
-    if (typeof supabaseClient === "undefined" || !supabaseClient) {
+   if (!window.supabaseClient) {
       teacherLoginMessage.textContent =
         "Supabase configuration is missing.";
       return;
@@ -316,7 +316,7 @@ if (teacherLoginButton) {
     teacherLoginMessage.textContent = "Signing in...";
 
     try {
-      const { error } = await supabaseClient.auth.signInWithPassword({
+      const { error } = await window.supabaseClient.auth.signInWithPassword({
         email,
         password
       });
