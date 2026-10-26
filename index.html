@@ -46,6 +46,20 @@
     </section>
 
     <section id="teacherView" class="view hidden">
+      <div id="teacherLogin" class="panel">
+  <p class="eyebrow">TEACHER LOGIN</p>
+  <h2>Welcome back!</h2>
+  <p class="hint">Sign in to manage your FrogQuiz exams and results.</p>
+
+  <label for="teacherEmail">Email address</label>
+  <input id="teacherEmail" type="email" placeholder="Your teacher email" autocomplete="username">
+
+  <label for="teacherPassword">Password</label>
+  <input id="teacherPassword" type="password" placeholder="Your password" autocomplete="current-password">
+
+  <button id="teacherLoginButton" class="primary wide">Sign in</button>
+  <p id="teacherLoginMessage" class="status" aria-live="polite"></p>
+</div>
       <div class="panel">
         <p class="eyebrow">TEACHER WORKSPACE</p><h2>Prepare an exam</h2>
         <p class="hint">Edit the sample exam below. Keep the JSON structure and save changes. This is a local prototype, not a secured teacher login.</p>
