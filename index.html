@@ -62,6 +62,16 @@
 </div>
       <div class="panel">
         <p class="eyebrow">TEACHER WORKSPACE</p><h2>Prepare an exam</h2>
+        <div class="class-settings">
+  <h3>Class settings</h3>
+
+  <label for="className">Class name</label>
+  <input id="className" type="text" placeholder="Example: Grade 10 - Filipino">
+
+  <label for="classCode">Class code</label>
+  <input id="classCode" type="text" maxlength="30" placeholder="Example: FILIPINO10">
+  <p class="hint">Give this code to your students so they can find their class exams.</p>
+</div>
         <p class="hint">Edit the sample exam below. Keep the JSON structure and save changes. This is a local prototype, not a secured teacher login.</p>
         <label for="examJson">Exam content (JSON)</label>
         <textarea id="examJson" rows="18" spellcheck="false"></textarea>
