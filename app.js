@@ -392,3 +392,35 @@ if (saveClassButton) {
     }
   });
 }
+async function loadSavedClasses() {
+  const classNameInput = document.getElementById("className");
+  const classCodeInput = document.getElementById("classCode");
+  const message = document.getElementById("classMessage");
+
+  if (!classNameInput || !classCodeInput || !window.supabaseClient) {
+    return;
+  }
+
+  try {
+    const { data, error } = await window.supabaseClient.rpc(
+      "frogquiz_get_classes"
+    );
+
+    if (error) throw error;
+
+    const classes = Array.isArray(data) ? data : [];
+
+    if (classes.length > 0) {
+      classNameInput.value = classes[0].class_name || "";
+      classCodeInput.value = classes[0].class_code || "";
+      if (message) message.textContent = "Saved class loaded.";
+    } else {
+      if (message) message.textContent = "No saved classes found.";
+    }
+  } catch (error) {
+    console.error("Load classes failed:", error);
+    if (message) message.textContent = "Could not load saved classes.";
+  }
+}
+
+loadSavedClasses();
