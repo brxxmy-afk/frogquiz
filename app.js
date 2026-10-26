@@ -1,58 +1,286 @@
-const teacherLoginPanel = document.getElementById("teacherLogin");
-const teacherLoginButton = document.getElementById("teacherLoginButton");
-const teacherLoginMessage = document.getElementById("teacherLoginMessage");
 
-const teacherWorkspacePanels = [...teacherView.children].filter(
-  (element) => element !== teacherLoginPanel
-);
+const SAMPLE_EXAM = {
+  title: "Forest Knowledge Check",
+  questions: [
+    {
+      question: "Which part of a plant usually absorbs water from the soil?",
+      choices: ["Flower", "Roots", "Leaves", "Fruit"],
+      answer: 1,
+      explanation: "Roots absorb water and minerals from the soil."
+    },
+    {
+      question: "What do frogs need to keep their skin moist?",
+      choices: ["Dry sand", "Oil", "Moist surroundings", "Sunlight only"],
+      answer: 2,
+      explanation: "Frogs generally need moist surroundings."
+    },
+    {
+      question: "Which action helps protect a local forest?",
+      choices: [
+        "Throwing rubbish into streams",
+        "Cutting every tree",
+        "Burning dry leaves in the forest",
+        "Keeping the area clean"
+      ],
+      answer: 3,
+      explanation: "Keeping the forest clean protects wildlife and habitats."
+    }
+  ]
+};
 
-teacherWorkspacePanels.forEach((panel) => panel.classList.add("hidden"));
+const EXAM_KEY = "frogquiz_exam_v1";
+const RESULTS_KEY = "frogquiz_results_v1";
 
-teacherLoginButton.addEventListener("click", async () => {
-  const email = document.getElementById("teacherEmail").value.trim();
-  const password = document.getElementById("teacherPassword").value;
-
-  if (!email || !password) {
-    teacherLoginMessage.textContent = "Enter your teacher email and password.";
-    return;
-  }
-
-  if (!supabaseClient) {
-    teacherLoginMessage.textContent = "Supabase configuration is missing.";
-    return;
-  }
-
-  teacherLoginButton.disabled = true;
-  teacherLoginMessage.textContent = "Signing in...";
-
+function readStorage(key, fallback) {
   try {
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+let exam = readStorage(EXAM_KEY, SAMPLE_EXAM);
+let results = readStorage(RESULTS_KEY, []);
+let submitted = false;
+
+const studentView = document.getElementById("studentView");
+const teacherView = document.getElementById("teacherView");
+
+function saveResults() {
+  localStorage.setItem(RESULTS_KEY, JSON.stringify(results));
+}
+
+function renderExam() {
+  document.getElementById("examTitle").textContent = exam.title;
+  document.getElementById("questionCount").textContent =
+    `${exam.questions.length} questions`;
+
+  document.getElementById("questions").innerHTML =
+    exam.questions.map((question, index) => `
+      <div class="question">
+        <h3>${index + 1}. ${escapeHTML(question.question)}</h3>
+        ${question.choices.map((choice, choiceIndex) => `
+          <label class="choice">
+            <input type="radio" name="q${index}" value="${choiceIndex}">
+            <span>${escapeHTML(choice)}</span>
+          </label>
+        `).join("")}
+      </div>
+    `).join("");
+
+  document.getElementById("result").classList.add("hidden");
+  document.getElementById("submitExam").disabled = false;
+  document.getElementById("submitExam").textContent = "Submit exam";
+  submitted = false;
+}
+
+function renderResults() {
+  const target = document.getElementById("resultsTable");
+
+  if (!results.length) {
+    target.innerHTML = '<p class="hint">No results yet.</p>';
+    return;
+  }
+
+  target.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>Student</th><th>Exam</th><th>Score</th><th>Percent</th></tr>
+      </thead>
+      <tbody>
+        ${results.slice().reverse().map(result => `
+          <tr>
+            <td>${escapeHTML(result.name)}</td>
+            <td>${escapeHTML(result.examTitle)}</td>
+            <td>${result.score}/${result.total}</td>
+            <td>${result.percent}%</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderForest() {
+  const forest = document.getElementById("forest");
+
+  if (!results.length) {
+    forest.innerHTML =
+      '<div class="forest-empty">Submit a demo exam to grow your frog! 🌱</div>';
+    return;
+  }
+
+  forest.innerHTML = results.slice(-12).map(result => {
+    const size = 26 + Math.round(result.percent * 0.48);
+    return `
+      <div class="frog-spot" title="Frog growth">
+        <span class="frog-emoji" style="font-size:${size}px">🐸</span>
+        <span class="lily">🪷</span>
+      </div>
+    `;
+  }).join("");
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav-btn").forEach(item => {
+      item.classList.toggle("active", item === button);
     });
 
-    if (error) throw error;
+    studentView.classList.toggle("hidden", button.dataset.view !== "student");
+    teacherView.classList.toggle("hidden", button.dataset.view !== "teacher");
 
-    const { data: isTeacher, error: roleError } =
-      await supabaseClient.rpc("is_frogquiz_teacher");
+    if (button.dataset.view === "teacher") {
+      document.getElementById("examJson").value =
+        JSON.stringify(exam, null, 2);
+      renderResults();
+    }
+  });
+});
 
-    if (roleError) throw roleError;
+document.getElementById("submitExam").addEventListener("click", () => {
+  if (submitted) return;
 
-    if (isTeacher !== true) {
-      await supabaseClient.auth.signOut();
-      throw new Error("This account is not authorized as a teacher.");
+  const name = document.getElementById("studentName").value.trim();
+
+  if (!name) {
+    alert("Please enter your name first.");
+    return;
+  }
+
+  const unanswered = exam.questions.findIndex((question, index) =>
+    !document.querySelector(`input[name="q${index}"]:checked`)
+  );
+
+  if (unanswered !== -1) {
+    alert(`Please answer question ${unanswered + 1}.`);
+    return;
+  }
+
+  let score = 0;
+
+  const review = exam.questions.map((question, index) => {
+    const selected = Number(
+      document.querySelector(`input[name="q${index}"]:checked`).value
+    );
+    const correct = selected === question.answer;
+
+    if (correct) score++;
+
+    return `
+      <p>
+        <strong>${index + 1}. ${correct ? "✅ Correct" : "🌱 Review this one"}</strong><br>
+        Your answer: ${escapeHTML(question.choices[selected])}<br>
+        Correct answer: ${escapeHTML(question.choices[question.answer])}<br>
+        ${escapeHTML(question.explanation || "")}
+      </p>
+    `;
+  }).join("");
+
+  const percent = Math.round(score / exam.questions.length * 100);
+
+  results.push({
+    name,
+    examTitle: exam.title,
+    score,
+    total: exam.questions.length,
+    percent,
+    submittedAt: new Date().toISOString()
+  });
+
+  saveResults();
+  submitted = true;
+
+  document.getElementById("result").innerHTML = `
+    <h3>You scored ${score}/${exam.questions.length} (${percent}%)</h3>
+    <p>Your frog is growing! 🐸</p>
+    <div class="answer-review"><h4>Answer review</h4>${review}</div>
+  `;
+
+  document.getElementById("result").classList.remove("hidden");
+  document.getElementById("submitExam").disabled = true;
+  document.getElementById("submitExam").textContent = "Submitted";
+
+  renderForest();
+  renderResults();
+});
+
+document.getElementById("saveExam").addEventListener("click", () => {
+  try {
+    const next = JSON.parse(document.getElementById("examJson").value);
+
+    if (!next.title || !Array.isArray(next.questions) || !next.questions.length) {
+      throw new Error("Provide an exam title and at least one question.");
     }
 
-    teacherLoginPanel.classList.add("hidden");
-    teacherWorkspacePanels.forEach((panel) => panel.classList.remove("hidden"));
+    next.questions.forEach((question, index) => {
+      if (
+        !question.question ||
+        !Array.isArray(question.choices) ||
+        question.choices.length < 2 ||
+        !Number.isInteger(question.answer) ||
+        question.answer < 0 ||
+        question.answer >= question.choices.length
+      ) {
+        throw new Error(`Please check question ${index + 1}.`);
+      }
+    });
 
-    document.getElementById("examJson").value = JSON.stringify(exam, null, 2);
-    renderResults();
-    teacherLoginMessage.textContent = "";
+    exam = next;
+    localStorage.setItem(EXAM_KEY, JSON.stringify(exam));
+    renderExam();
+
+    document.getElementById("teacherMessage").textContent =
+      "Exam saved on this device.";
   } catch (error) {
-    teacherLoginMessage.textContent =
-      error.message || "Sign-in failed. Please try again.";
-  } finally {
-    teacherLoginButton.disabled = false;
+    document.getElementById("teacherMessage").textContent =
+      "Could not save: " + error.message;
   }
 });
+
+document.getElementById("resetExam").addEventListener("click", () => {
+  exam = JSON.parse(JSON.stringify(SAMPLE_EXAM));
+  localStorage.setItem(EXAM_KEY, JSON.stringify(exam));
+  document.getElementById("examJson").value = JSON.stringify(exam, null, 2);
+  renderExam();
+
+  document.getElementById("teacherMessage").textContent =
+    "Sample exam restored.";
+});
+
+document.getElementById("clearResults").addEventListener("click", () => {
+  if (confirm("Clear all demo results on this device?")) {
+    results = [];
+    saveResults();
+    renderResults();
+    renderForest();
+  }
+});
+
+document.getElementById("exportResults").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(results, null, 2)], {
+    type: "application/json"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "frogquiz-results.json";
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+renderExam();
+renderResults();
+renderForest();
