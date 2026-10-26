@@ -1,4 +1,3 @@
-
 const teacherLoginPanel = document.getElementById("teacherLogin");
 const teacherLoginButton = document.getElementById("teacherLoginButton");
 const teacherLoginMessage = document.getElementById("teacherLoginMessage");
@@ -27,7 +26,7 @@ teacherLoginButton.addEventListener("click", async () => {
   teacherLoginMessage.textContent = "Signing in...";
 
   try {
-    const { error } = await supabaseClient.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
       email,
       password
     });
@@ -51,59 +50,9 @@ teacherLoginButton.addEventListener("click", async () => {
     renderResults();
     teacherLoginMessage.textContent = "";
   } catch (error) {
-    console.error("Teacher login failed:", error);
     teacherLoginMessage.textContent =
       error.message || "Sign-in failed. Please try again.";
   } finally {
     teacherLoginButton.disabled = false;
   }
 });
-
-const saveClassButton = document.getElementById("saveClass");
-
-if (saveClassButton) {
-  saveClassButton.addEventListener("click", async () => {
-    const className = document.getElementById("className")?.value.trim();
-    const classCode = document.getElementById("classCode")?.value.trim();
-    const message = document.getElementById("classMessage");
-
-    if (!message) {
-      alert("The class message element is missing from index.html.");
-      return;
-    }
-
-    if (!className || !classCode) {
-      message.textContent = "Enter both the class name and class code.";
-      return;
-    }
-
-    if (!supabaseClient) {
-      message.textContent = "Supabase configuration is missing.";
-      return;
-    }
-
-    saveClassButton.disabled = true;
-    message.textContent = "Saving class...";
-
-    try {
-      const { data, error } = await supabaseClient.rpc(
-        "frogquiz_create_class",
-        {
-          p_class_name: className,
-          p_class_code: classCode
-        }
-      );
-
-      if (error) throw error;
-
-      message.textContent = `Class saved! Code: ${data.class_code}`;
-    } catch (error) {
-      console.error("Save class failed:", error);
-      message.textContent = "Could not save class: " + error.message;
-    } finally {
-      saveClassButton.disabled = false;
-    }
-  });
-} else {
-  console.error("FrogQuiz: saveClass button not found.");
-}
